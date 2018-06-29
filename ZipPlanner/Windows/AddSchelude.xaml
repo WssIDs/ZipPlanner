@@ -1,0 +1,30 @@
+﻿<Window x:Class="ZipPlanner.Windows.AddSchelude"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:ZipPlanner.Windows"
+        mc:Ignorable="d"
+        Title="AddSchedule" Height="450" Width="384.884">
+    <Grid>
+        <StackPanel Margin="5" Orientation="Vertical">
+            <TextBlock Text="Имя задания"/>
+            <TextBox Text="{Binding Name}"/>
+            <TextBlock Text="Имя группы задания"/>
+            <TextBox Text="{Binding Group}"/>
+            <TextBlock Text="Период"/>
+            <TextBox Name="cronexpression_tb" Text="{Binding CronExpression}"/>
+            <TextBlock Text="Дирректория поиска"/>
+            <TextBox Text="{Binding StartPath}"/>
+            <TextBlock Text="Дирректория дя сохранения"/>
+            <TextBox Text="{Binding EndPath}"/>
+            <TextBlock Text="Имя файла архива"/>
+            <TextBox Text="{Binding EndFileName}"/>
+            <TextBlock Text="Шаблон поиска файлов"/>
+            <TextBox Name="search_tb" Text="{Binding SearchPattern}"/>
+            <TextBlock Text="Удаление файлов после архивации"/>
+            <CheckBox Name="deletefiles_cb" IsChecked="{Binding DeleteFiles}"/>
+            <Button Name="ok" IsDefault="True" Click="ok_Click">Применить</Button>
+        </StackPanel>
+    </Grid>
+</Window>

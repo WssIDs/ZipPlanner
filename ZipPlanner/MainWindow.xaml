@@ -1,12 +1,52 @@
-﻿<Window x:Class="ZipPlanner.MainWindow"
+﻿<Window x:Name="Scheluder" x:Class="ZipPlanner.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:ZipPlanner"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
+        Title="Настройка планировщика" Height="450" Width="800" Closing="Scheluder_Closing">
+  
     <Grid>
-        
+        <Grid.RowDefinitions>
+            <RowDefinition></RowDefinition>
+            <RowDefinition></RowDefinition>
+        </Grid.RowDefinitions>
+        <StackPanel Margin="5" Grid.Row="0">
+            <TextBlock Text="Архивирование"></TextBlock>
+            <DataGrid Name="db_archivejobs" Height="194" VerticalAlignment="Top" ItemsSource="{Binding}" CanUserAddRows="False" CanUserDeleteRows="False" AutoGenerateColumns="false" IsTextSearchEnabled="True" IsTabStop="True" IsReadOnly="True">
+                <DataGrid.Resources>
+                    <Style TargetType="DataGridRow">
+                        <EventSetter Event="MouseDoubleClick" Handler="Row_DoubleClick"/>
+                    </Style>
+                </DataGrid.Resources>
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="Имя задания" Width="175" Binding="{Binding Path=Name}" IsReadOnly="True"></DataGridTextColumn>
+                    <DataGridTextColumn Header="Имя группы задания" Width="175" Binding="{Binding Path=Group}"  IsReadOnly="True"></DataGridTextColumn>
+                    <DataGridTextColumn Header="Период" Width="175" Binding="{Binding Path=CronExpression}"  IsReadOnly="True"></DataGridTextColumn>
+                    <DataGridTextColumn Header="Дирректория поиска" Width="175" Binding="{Binding Path=StartPath}"  IsReadOnly="True"></DataGridTextColumn>
+                    <DataGridTextColumn Header="Дирректория дя сохранения" Width="175" Binding="{Binding Path=EndPath}"  IsReadOnly="True"></DataGridTextColumn>
+                    <DataGridTextColumn Header="Имя файла архива" Width="175" Binding="{Binding Path=EndFileName}"  IsReadOnly="True"></DataGridTextColumn>
+                    <DataGridTextColumn Header="Шаблон поиска файлов" Width="175" Binding="{Binding Path=SearchPattern}"  IsReadOnly="True"></DataGridTextColumn>
+                    <DataGridCheckBoxColumn Header="Удаление файлов после архивации" Width="175" Binding="{Binding Path=DeleteFiles}"  IsReadOnly="True"></DataGridCheckBoxColumn>
+                    <DataGridCheckBoxColumn Header="Статус задания" Width="175" Binding="{Binding Path=Status}" IsReadOnly="true"></DataGridCheckBoxColumn>
+                </DataGrid.Columns>
+                <DataGrid.RowDetailsTemplate>
+                <DataTemplate>
+                        <StackPanel Orientation="Vertical">
+                            <TextBlock><Hyperlink NavigateUri="www.cron.com">Настройка планировщика Cron</Hyperlink></TextBlock>
+                            <TextBlock Text="Имя файла может оставаться пустым" />
+                            <TextBlock>Настройка фильтра поиска 
+                                <Hyperlink NavigateUri="https://docs.microsoft.com/ru-ru/windows/desktop/ADSI/search-filter-syntax">https://docs.microsoft.com/ru-ru/windows/desktop/ADSI/search-filter-syntax</Hyperlink>
+                            </TextBlock>
+                        </StackPanel>
+                    </DataTemplate>
+                </DataGrid.RowDetailsTemplate>
+            </DataGrid>
+        </StackPanel>
+        <StackPanel Margin="5" Grid.Row="1">
+            <TextBlock Text="Выполнение внешних приложений и команд"></TextBlock>
+            <DataGrid Name="db_customjobs" Height="194" VerticalAlignment="Top" ItemsSource="{Binding}"/>
+        </StackPanel>
     </Grid>
 </Window>
