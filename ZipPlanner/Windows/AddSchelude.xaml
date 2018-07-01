@@ -1,30 +1,153 @@
-﻿<Window x:Class="ZipPlanner.Windows.AddSchelude"
+﻿<Window x:Class="ZipPlanner.Windows.AddSchedule"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:ZipPlanner.Windows"
         mc:Ignorable="d"
-        Title="AddSchedule" Height="450" Width="384.884">
-    <Grid>
+        Title="Задание" Height="488.088" Width="384.884" WindowStartupLocation="CenterOwner" ResizeMode="NoResize">
+    <Window.Resources>
+        <Style TargetType="TextBox">
+            <Style.Triggers>
+                <Trigger Property="Validation.HasError" Value="True">
+                    <Setter Property="ToolTip"
+                Value="{Binding RelativeSource={RelativeSource Self},
+                    Path=(Validation.Errors)[0].ErrorContent}" />
+                    <Setter Property="Foreground" Value="LightPink" />
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+    </Window.Resources>
+    <Grid Name="mainGrid">
         <StackPanel Margin="5" Orientation="Vertical">
             <TextBlock Text="Имя задания"/>
-            <TextBox Text="{Binding Name}"/>
+            <TextBox Name="name_txt">
+                <TextBox.Text>
+                    <Binding Path="Name"  NotifyOnValidationError="True" UpdateSourceTrigger="PropertyChanged">
+                        <Binding.ValidationRules>
+                            <DataErrorValidationRule />
+                        </Binding.ValidationRules>
+                    </Binding>
+                </TextBox.Text>
+            </TextBox>
+            <CheckBox Content="Добавить имя задания к имени файла?" IsChecked="{Binding UseName}"/>
             <TextBlock Text="Имя группы задания"/>
-            <TextBox Text="{Binding Group}"/>
+            <TextBox>
+                <TextBox.Text>
+                    <Binding Path="Group"  NotifyOnValidationError="True" UpdateSourceTrigger="PropertyChanged">
+                        <Binding.ValidationRules>
+                            <DataErrorValidationRule />
+                        </Binding.ValidationRules>
+                    </Binding>
+                </TextBox.Text>
+            </TextBox>
+            <CheckBox Content="Добавить имя группы задания к имени файла?" IsChecked="{Binding UseGroup}"/>
             <TextBlock Text="Период"/>
-            <TextBox Name="cronexpression_tb" Text="{Binding CronExpression}"/>
+            <TextBox Name="cronexpression_tb">
+                <TextBox.Text>
+                    <Binding Path="CronExpression"  NotifyOnValidationError="True" UpdateSourceTrigger="PropertyChanged">
+                        <Binding.ValidationRules>
+                            <DataErrorValidationRule />
+                        </Binding.ValidationRules>
+                    </Binding>
+                </TextBox.Text>
+            </TextBox>
             <TextBlock Text="Дирректория поиска"/>
             <TextBox Text="{Binding StartPath}"/>
             <TextBlock Text="Дирректория дя сохранения"/>
             <TextBox Text="{Binding EndPath}"/>
             <TextBlock Text="Имя файла архива"/>
             <TextBox Text="{Binding EndFileName}"/>
-            <TextBlock Text="Шаблон поиска файлов"/>
-            <TextBox Name="search_tb" Text="{Binding SearchPattern}"/>
-            <TextBlock Text="Удаление файлов после архивации"/>
-            <CheckBox Name="deletefiles_cb" IsChecked="{Binding DeleteFiles}"/>
-            <Button Name="ok" IsDefault="True" Click="ok_Click">Применить</Button>
+            <TextBlock Text="Формат даты (используется в имени файла)"/>
+            <TextBox Text="{Binding DateTimeFormat}"/>
+            <CheckBox Content="Добавить дату к имени файла?" IsChecked="{Binding UseDateTimeFormat}"/>
+            <TextBlock Text="Фильтр"/>
+            <ListBox Name="filter_lb" ItemsSource="{Binding Path=Filter}" Height="50">
+                <ListBox.ItemTemplate>
+                    <DataTemplate>
+                        <TextBox Text="{Binding Name, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=True}"
+                     Validation.ValidationAdornerSite="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListBoxItem}}"/>
+                    </DataTemplate>
+                </ListBox.ItemTemplate>
+                <ListBox.ItemContainerStyle>
+                    <Style TargetType="ListBoxItem">
+                        <Setter Property="Validation.ErrorTemplate">
+                            <Setter.Value>
+                                <ControlTemplate>
+                                    <Border Background="Red" Opacity="0.2">
+                                        <Adorn edElementPlaceholder/>
+                                    </Border>
+                                </ControlTemplate>
+                            </Setter.Value>
+                        </Setter>
+                    </Style>
+                </ListBox.ItemContainerStyle>
+                <ListBox.ContextMenu>
+                    <ContextMenu>
+                        <MenuItem Name="addfilter_bt" Header="Добавить"  Click="Addfilter_bt_Click"/>
+                        <MenuItem Header="Удалить" Name="removefilter_bt" Click="Removefilter_bt_Click">
+                            <MenuItem.Style>
+                                <Style TargetType="{x:Type MenuItem}">
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding Filter.Count}" Value="0">
+                                            <Setter Property="IsEnabled" Value="False"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </MenuItem.Style>
+                        </MenuItem>
+                    </ContextMenu>
+                </ListBox.ContextMenu>
+                <!--<ListBox.Resources>
+                    <ContextMenu x:Key="ItemMenu">
+                        <MenuItem Name="addfilter_bt" Header="Добавить"  Click="Addfilter_bt_Click"/>
+                        <MenuItem Header="Удалить" Name="removefilter_bt" Click="Removefilter_bt_Click">
+                            <MenuItem.Style>
+                                <Style TargetType="{x:Type MenuItem}">
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding Filter.Count}" Value="0">
+                                            <Setter Property="IsEnabled" Value="False"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </MenuItem.Style>
+                        </MenuItem>
+                    </ContextMenu>
+                </ListBox.Resources>
+                <Style TargetType="ListBoxItem" >
+                    <Setter Property="ContextMenu" Value="{StaticResource ItemMenu}" />
+                </Style>-->
+            </ListBox>
+            <!--<Button Name="addfilter_bt" Content="Добавить фильтр" Click="Addfilter_bt_Click"></Button>-->
+            <!--<Button Name="removefilter_bt" Content="Удалить фильтр" Click="Removefilter_bt_Click">
+                <Button.Style>
+                    <Style TargetType="{x:Type Button}">
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding Filter.Count}" Value="0">
+                                <Setter Property="IsEnabled" Value="False"/>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </Button.Style>
+            </Button>-->
+            <CheckBox Content="Добавить GUID к имени файла?" IsChecked="{Binding UseGuid}"/>
+            <CheckBox Name="deletefiles_cb" Content="Удаление файлов после архивации" IsChecked="{Binding DeleteFiles}"/>
+            <Button Name="ok" IsDefault="True" Click="Ok_Click" Content="Применить" >
+                <Button.Style>
+                    <Style TargetType="Button">
+                        <Setter Property="IsEnabled" Value="False"/>
+                        <Style.Triggers>
+                            <MultiDataTrigger>
+                                <MultiDataTrigger.Conditions>
+                                    <Condition Binding="{Binding Path=(Validation.HasError), ElementName=name_txt}" Value="False"/>
+                                    <Condition Binding="{Binding Path=(Validation.HasError), ElementName=cronexpression_tb}" Value="False"/>
+                                </MultiDataTrigger.Conditions>
+                                <Setter Property="IsEnabled" Value="True"/>
+                            </MultiDataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </Button.Style>
+            </Button>
         </StackPanel>
     </Grid>
 </Window>

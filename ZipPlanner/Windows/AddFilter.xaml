@@ -1,0 +1,17 @@
+﻿<Window x:Class="ZipPlanner.Windows.AddFilter"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:ZipPlanner.Windows"
+        mc:Ignorable="d"
+        Title="AddFiler" Height="145.666" Width="331.661" WindowStartupLocation="CenterOwner" ResizeMode="NoResize">
+    <Grid>
+        <StackPanel Margin="5">
+            <TextBlock Text="Фильтр" Margin="3"/>
+            <TextBox Name="filter_txt" Text="{Binding filter}" Margin="3"/>
+            <Button IsDefault="True" Content="Добавить" Click="Button_Click" Margin="3"/>
+            <Button IsCancel="True" Content="Отмена" Margin="3"/>
+        </StackPanel>
+    </Grid>
+</Window>

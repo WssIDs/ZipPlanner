@@ -6,42 +6,57 @@
         xmlns:local="clr-namespace:ZipPlanner"
         mc:Ignorable="d"
         Title="Настройка планировщика" Height="450" Width="800" Closing="Scheluder_Closing">
-  
+    <Window.Resources>
+        <local:InverseBooleanConverter x:Key="InverseConverter"></local:InverseBooleanConverter>
+    </Window.Resources>
     <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition></ColumnDefinition>
+
+        </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
             <RowDefinition></RowDefinition>
             <RowDefinition></RowDefinition>
         </Grid.RowDefinitions>
         <StackPanel Margin="5" Grid.Row="0">
             <TextBlock Text="Архивирование"></TextBlock>
-            <DataGrid Name="db_archivejobs" Height="194" VerticalAlignment="Top" ItemsSource="{Binding}" CanUserAddRows="False" CanUserDeleteRows="False" AutoGenerateColumns="false" IsTextSearchEnabled="True" IsTabStop="True" IsReadOnly="True">
+            <DataGrid Name="db_archivejobs" Height="194" VerticalAlignment="Top" ItemsSource="{Binding}" CanUserAddRows="False" CanUserDeleteRows="False" AutoGenerateColumns="false" IsTextSearchEnabled="True" IsTabStop="True" SelectedItem="{Binding SelectedRow, Mode=TwoWay}" SelectionMode="Single" CanUserSortColumns="False">
                 <DataGrid.Resources>
-                    <Style TargetType="DataGridRow">
-                        <EventSetter Event="MouseDoubleClick" Handler="Row_DoubleClick"/>
-                    </Style>
+                    <ContextMenu x:Key="RowMenu" DataContext="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource Self}}">
+                        <MenuItem Name="status_run" Header="Запустить" Click="start_bt_Click" IsEnabled="{Binding Path=Status, Converter={StaticResource InverseConverter}}"/>
+                        <MenuItem Header="Остановить" Name="status_stop" Click="stop_bt_Click"  IsEnabled="{Binding Path=Status}"/>
+                        <Separator/>
+                        <MenuItem Header="Редактировать" Name="editarch_bt" Click="edit_bt_Click"/>
+                        <MenuItem Header="Удалить" Name="removearch_bt" Click="removearch_bt_Click"/>
+                    </ContextMenu>
                 </DataGrid.Resources>
+                <DataGrid.RowStyle>
+                    <Style TargetType="DataGridRow" >
+                        <Setter Property="ContextMenu" Value="{StaticResource RowMenu}" />
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding Path=Status}" Value="true">
+                                <Setter Property="Background" Value="LightGreen"/>
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding Path=Status}" Value="false">
+                                <Setter Property="Background" Value="LightPink"/>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </DataGrid.RowStyle>
+                <DataGrid.ContextMenu>
+                    <ContextMenu>
+                        <MenuItem Name="addarch_bt" Header="Добавить задание" Click="addarch_bt_Click"/>
+                        <Separator/>
+                        <MenuItem Name="stopAllSchelude_bt" Header="Остановить все задания" Click="stopAllSchelude_bt_Click"/>
+                        <MenuItem Name="startAllSchelude_bt" Header="Запустить все задания" Click="startAllSchelude_bt_Click"/>
+                    </ContextMenu>
+                </DataGrid.ContextMenu>
                 <DataGrid.Columns>
-                    <DataGridTextColumn Header="Имя задания" Width="175" Binding="{Binding Path=Name}" IsReadOnly="True"></DataGridTextColumn>
-                    <DataGridTextColumn Header="Имя группы задания" Width="175" Binding="{Binding Path=Group}"  IsReadOnly="True"></DataGridTextColumn>
-                    <DataGridTextColumn Header="Период" Width="175" Binding="{Binding Path=CronExpression}"  IsReadOnly="True"></DataGridTextColumn>
-                    <DataGridTextColumn Header="Дирректория поиска" Width="175" Binding="{Binding Path=StartPath}"  IsReadOnly="True"></DataGridTextColumn>
-                    <DataGridTextColumn Header="Дирректория дя сохранения" Width="175" Binding="{Binding Path=EndPath}"  IsReadOnly="True"></DataGridTextColumn>
-                    <DataGridTextColumn Header="Имя файла архива" Width="175" Binding="{Binding Path=EndFileName}"  IsReadOnly="True"></DataGridTextColumn>
-                    <DataGridTextColumn Header="Шаблон поиска файлов" Width="175" Binding="{Binding Path=SearchPattern}"  IsReadOnly="True"></DataGridTextColumn>
-                    <DataGridCheckBoxColumn Header="Удаление файлов после архивации" Width="175" Binding="{Binding Path=DeleteFiles}"  IsReadOnly="True"></DataGridCheckBoxColumn>
-                    <DataGridCheckBoxColumn Header="Статус задания" Width="175" Binding="{Binding Path=Status}" IsReadOnly="true"></DataGridCheckBoxColumn>
+                    <DataGridTextColumn Header="Имя задания" Width="*" Binding="{Binding Path=Name}" IsReadOnly="True"></DataGridTextColumn>
+                    <DataGridTextColumn Header="Имя группы задания" Width="*" Binding="{Binding Path=Group}"  IsReadOnly="True"></DataGridTextColumn>
+                    <DataGridTextColumn Header="Период" Width="*" Binding="{Binding Path=CronExpression}"  IsReadOnly="True"></DataGridTextColumn>
+                    <DataGridTextColumn Header="Имя файла архива" Width="*" Binding="{Binding Path=EndFileName}"  IsReadOnly="True"></DataGridTextColumn>
                 </DataGrid.Columns>
-                <DataGrid.RowDetailsTemplate>
-                <DataTemplate>
-                        <StackPanel Orientation="Vertical">
-                            <TextBlock><Hyperlink NavigateUri="www.cron.com">Настройка планировщика Cron</Hyperlink></TextBlock>
-                            <TextBlock Text="Имя файла может оставаться пустым" />
-                            <TextBlock>Настройка фильтра поиска 
-                                <Hyperlink NavigateUri="https://docs.microsoft.com/ru-ru/windows/desktop/ADSI/search-filter-syntax">https://docs.microsoft.com/ru-ru/windows/desktop/ADSI/search-filter-syntax</Hyperlink>
-                            </TextBlock>
-                        </StackPanel>
-                    </DataTemplate>
-                </DataGrid.RowDetailsTemplate>
             </DataGrid>
         </StackPanel>
         <StackPanel Margin="5" Grid.Row="1">

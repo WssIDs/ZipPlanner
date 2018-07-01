@@ -13,6 +13,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
 using System.Windows.Data;
 using System.Windows.Documents;
 using System.Windows.Input;
@@ -20,6 +21,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using AutoMapper;
 using NCrontab;
 using NLog;
 using Quartz;
@@ -31,164 +33,6 @@ using ZipPlanner.Windows;
 
 namespace ZipPlanner
 {
-    public class ArchiveJob : IJob
-    {
-        Task IJob.Execute(IJobExecutionContext context)
-        {
-            JobDataMap dataMap = context.MergedJobDataMap;  // Note the difference from the previous example
-            string command = dataMap.GetString("Command");
-            string startpath = dataMap.GetString("StartPath");
-            string endpath = dataMap.GetString("EndPath");
-            string endfilename = dataMap.GetString("EndFileName");
-            string searchpattern = dataMap.GetString("SearchPattern");
-            bool deletefiles = dataMap.GetBoolean("DeleteFiles");
-            
-            DateTime date = DateTime.Now;
-
-            string FileName = endpath+endfilename+"_"+context.Trigger.Key.Name+"_"+ context.Trigger.Key.Group + "_" + date.Day + "_" + date.Month + "_" + date.Year + "_" + date.Minute +".zip";
-
-            DirectoryInfo di = new DirectoryInfo(startpath);
-
-            var logger = NLog.LogManager.GetCurrentClassLogger();
-
-            logger.Info("Выполнение задания - " + context.Trigger.Key.Name + ": " + context.Trigger.Key.Group);
-            logger.Info("Автоматическое удаление исходных файлов включено");
-            logger.Info("Создание архива - " + FileName);
-
-            List<FileInfo> files = di.GetFiles(searchpattern, SearchOption.TopDirectoryOnly).ToList();
-
-            if (files != null)
-            {
-                if (files.Count > 0)
-                {
-                    using (FileStream zipToOpen = new FileStream(FileName, FileMode.Create))
-                    {
-                        using (ZipArchive archive = new ZipArchive(zipToOpen, mode: ZipArchiveMode.Create))
-                        {
-                            foreach (var file in files)
-                            {
-                                archive.CreateEntryFromFile(file.FullName, file.Name);
-                            }
-                        }
-                    }
-
-                    logger.Info("Архив - " + FileName + " создан");
-                    logger.Info("Задание - " + context.Trigger.Key.Name + ": " + context.Trigger.Key.Group + " завершено!");
-
-                    if (deletefiles)
-                    {
-                        foreach (var file in files)
-                        {
-                            File.Delete(file.FullName);
-                        }
-                    }
-                }
-                else
-                {
-                    logger.Warn("Архив - " + FileName + " не создан");
-                    logger.Warn("Отсутствуют файлы в директории");
-                }
-
-            }
-            else
-            {
-                logger.Warn("Архив - " + FileName + " не создан");
-                logger.Warn("Не удалость получить список файлов");
-            }
-
-            return Task.CompletedTask;
-        }
-    }
-
-    public class ArchiveSheduler
-    {
-        public static async void Start(ArchiveSavedJob archiveJob)
-        {
-
-            var logger = LogManager.GetCurrentClassLogger();
-
-            try
-            {
-                IScheduler scheduler = await StdSchedulerFactory.GetDefaultScheduler();
-                await scheduler.Start();
-
-                IJobDetail job = JobBuilder.Create<ArchiveJob>().WithDescription("Архивация").Build();
-
-                CronExpression.ValidateExpression(archiveJob.CronExpression);
-
-                ITrigger trigger = TriggerBuilder.Create()  // создаем триггер
-                    .WithIdentity(archiveJob.Name, archiveJob.Group)     // идентифицируем триггер с именем и группой
-                    .StartNow()
-                    .WithCronSchedule(archiveJob.CronExpression)      // каждую минуту 
-                    .UsingJobData("StartPath", archiveJob.StartPath)
-                    .UsingJobData("EndPath", archiveJob.EndPath)
-                    .UsingJobData("EndFileName", archiveJob.EndFileName)
-                    .UsingJobData("SearchPattern", archiveJob.SearchPattern)
-                    .UsingJobData("DeleteFiles", archiveJob.DeleteFiles)
-                    .ForJob(job)
-                    .Build();                               // создаем триггер
-
-
-                if (job != null && trigger != null)
-                {
-                    await scheduler.ScheduleJob(job, trigger);        // начинаем выполнение работы
-
-                    logger.Info("Инициализация планировщика - " + archiveJob.Name + ": " + archiveJob.Group);
-
-                    archiveJob.Status = true;
-
-                    //
-                }
-                else
-                {
-                    logger.Error("Ошибка инициализации планировщика - " + archiveJob.Name + ": " + archiveJob.Group);
-                }
-            }
-            catch (Exception e)
-            {
-                logger.Error("Ошибка - "+e.Message);
-            }
-
-            //return ScheludeStatus.STOPPED;
-
-            archiveJob.Status = false;
-        }
-
-        public static async Task<bool> GetStatusAsync(ArchiveSavedJob job)
-        {
-            IScheduler scheduler = await StdSchedulerFactory.GetDefaultScheduler();
-            TriggerKey key = new TriggerKey(job.Name, job.Group);
-
-            if (scheduler.IsStarted == true)
-            {
-                return true;
-            }
-
-            return false;
-        }
-
-        public static async void Stop(ArchiveSavedJob job)
-        {
-            var logger = LogManager.GetCurrentClassLogger();
-
-            try
-            {
-                IScheduler scheduler = await StdSchedulerFactory.GetDefaultScheduler();
-
-                TriggerKey key = new TriggerKey(job.Name, job.Group);
-
-                await scheduler.UnscheduleJob(key);
-
-                logger.Info("Задание - " + key.Name + ": " + key.Group + " остановлено !");
-            }
-            catch (Exception e)
-            {
-                logger.Error("Ошибка -" + e.Message);
-            }
-        }
-    }
-
-
     public class CustomJob : IJob
     {
         Task IJob.Execute(IJobExecutionContext context)
@@ -315,13 +159,10 @@ namespace ZipPlanner
                 {
                     if (archiveJobs.Count > 0)
                     {
-                        foreach (ArchiveSavedJob job in archiveJobs)
+                        for (int i = 0; i < archiveJobs.Count; i++)
                         {
-                            // Запуск планировщика
-                            ArchiveSheduler.Start(job);
-
+                            archiveJobs[i].Status = ArchiveScheduler.Start(archiveJobs[i]).Result;
                         }
-
                     }
                 }
                 db_archivejobs.DataContext = archiveJobs;
@@ -354,33 +195,103 @@ namespace ZipPlanner
             logger.Info("Завершение работы приложения");
         }
 
-
-
-        private void InitDataGrid()
+        private void addarch_bt_Click(object sender, RoutedEventArgs e)
         {
-            Style rowStyle = new Style(typeof(DataGridRow));
-            rowStyle.Setters.Add(new EventSetter(DataGridRow.MouseDoubleClickEvent,
-                                     new MouseButtonEventHandler(Row_DoubleClick)));
-            db_archivejobs.RowStyle = rowStyle;
-        }
-
-        private void Row_DoubleClick(object sender, MouseButtonEventArgs e)
-        {
-            DataGridRow row = sender as DataGridRow;
-
-            var item = row.Item as ArchiveSavedJob;
-
-            var addSchelude_dlg = new AddSchelude(item);
+            ArchiveSavedJob archiveJob = new ArchiveSavedJob();
+            archiveJob.Id = Guid.NewGuid();
+            var addSchelude_dlg = new AddSchedule(archiveJob);
 
             if (addSchelude_dlg.ShowDialog() == true)
             {
-                ArchiveSheduler.Stop(item);
+                archiveJobs.Add(archiveJob);
                 //archiveJobs.
                 MessageBox.Show("Успешно изменено");
-                ArchiveSheduler.Start(item);
+                archiveJob.Status = ArchiveScheduler.Start(archiveJob).Result;
+            }
+        }
+
+        private void removearch_bt_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        private void edit_bt_Click(object sender, RoutedEventArgs e)
+        {
+            var item = db_archivejobs.SelectedItem as ArchiveSavedJob;
+
+            Mapper.Reset();
+            Mapper.Initialize(cfg => cfg.CreateMap<ArchiveSavedJob, ArchiveSavedJob>());
+            ArchiveSavedJob temp = Mapper.Map<ArchiveSavedJob>(item);
+
+            var addSchelude_dlg = new AddSchedule(item);
+
+            if (addSchelude_dlg.ShowDialog() == true)
+            {
+                item.Status = !ArchiveScheduler.Stop(item).Result;
+                //archiveJobs.
+                item.Status = ArchiveScheduler.Start(item).Result;
+            }
+            else
+            { 
+                archiveJobs[db_archivejobs.SelectedIndex] = temp;
             }
 
-            // Some operations with this row
+            db_archivejobs.Items.Refresh();
+
+        }
+
+        private void stop_bt_Click(object sender, RoutedEventArgs e)
+        {
+            var item = db_archivejobs.SelectedItem as ArchiveSavedJob;
+
+            if(item != null)
+            {
+                if(item.Status == true)
+                {
+                    item.Status = !ArchiveScheduler.Stop(item).Result;
+                    db_archivejobs.Items.Refresh();
+                }
+            }
+
+        }
+
+        private void start_bt_Click(object sender, RoutedEventArgs e)
+        {
+            var item = db_archivejobs.SelectedItem as ArchiveSavedJob;
+
+            if (item != null)
+            {
+                if (item.Status == false)
+                {
+                    item.Status = ArchiveScheduler.Start(item).Result;
+                    db_archivejobs.Items.Refresh();
+                }
+            }
+
+        }
+
+        private void stopAllSchelude_bt_Click(object sender, RoutedEventArgs e)
+        {
+            if (archiveJobs.Count > 0)
+            {
+                for (int i = 0; i < archiveJobs.Count; i++)
+                {
+                    archiveJobs[i].Status = !ArchiveScheduler.Stop(archiveJobs[i]).Result;
+                    db_archivejobs.Items.Refresh();
+                }
+            }
+        }
+
+        private void startAllSchelude_bt_Click(object sender, RoutedEventArgs e)
+        {
+            if (archiveJobs.Count > 0)
+            {
+                for (int i = 0; i < archiveJobs.Count; i++)
+                {
+                    archiveJobs[i].Status = ArchiveScheduler.Start(archiveJobs[i]).Result;
+                    db_archivejobs.Items.Refresh();
+                }
+            }
         }
     }
 }
