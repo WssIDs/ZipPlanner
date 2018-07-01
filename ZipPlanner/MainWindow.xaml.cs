@@ -140,20 +140,8 @@ namespace ZipPlanner
                 InitializeComponent();
 
 
-                if (File.Exists("archive-jobs.dat"))
-                {
-                    // десериализация из файла people.dat
-                    using (FileStream fs = new FileStream("archive-jobs.dat", FileMode.OpenOrCreate))
-                    {
-                        BinaryFormatter bf = new BinaryFormatter();
-
-                        object obj = bf.Deserialize(fs);
-
-                        var objects = obj as ObservableCollection<ArchiveSavedJob>;
-                        archiveJobs = objects;
-                    }
-                }
-
+                var objects = LoadData("archive-jobs.dat") as ObservableCollection<ArchiveSavedJob>;
+                archiveJobs = objects;
 
                 if (Settings.Default.bAutoStartScheduler)
                 {
@@ -179,13 +167,8 @@ namespace ZipPlanner
 
         private void Scheluder_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
-            // создаем объект BinaryFormatter
-            BinaryFormatter formatter = new BinaryFormatter();
-            // получаем поток, куда будем записывать сериализованный объект
-            using (FileStream fs = new FileStream("archive-jobs.dat", FileMode.OpenOrCreate))
-            {
-                formatter.Serialize(fs, archiveJobs);
-            }
+
+            SaveData("archive-jobs.dat", archiveJobs);
 
             foreach(var job in archiveJobs)
             {
@@ -207,7 +190,11 @@ namespace ZipPlanner
                 //archiveJobs.
                 MessageBox.Show("Успешно изменено");
                 archiveJob.Status = ArchiveScheduler.Start(archiveJob).Result;
+
+                SaveData("archive-jobs.dat", archiveJobs);
             }
+
+            db_archivejobs.Items.Refresh();
         }
 
         private void removearch_bt_Click(object sender, RoutedEventArgs e)
@@ -224,6 +211,7 @@ namespace ZipPlanner
             ArchiveSavedJob temp = Mapper.Map<ArchiveSavedJob>(item);
 
             var addSchelude_dlg = new AddSchedule(item);
+            addSchelude_dlg.Owner = this;
 
             if (addSchelude_dlg.ShowDialog() == true)
             {
@@ -292,6 +280,38 @@ namespace ZipPlanner
                     db_archivejobs.Items.Refresh();
                 }
             }
+        }
+
+
+        private void SaveData(string filename,object jobs)
+        {
+            // создаем объект BinaryFormatter
+            BinaryFormatter formatter = new BinaryFormatter();
+            // получаем поток, куда будем записывать сериализованный объект
+            using (FileStream fs = new FileStream(filename, FileMode.Create))
+            {
+                formatter.Serialize(fs, jobs);
+            }
+        }
+
+        private object LoadData(string filename)
+        {
+
+            if (File.Exists(filename))
+            {
+                // десериализация из файла people.dat
+                using (FileStream fs = new FileStream(filename, FileMode.Open))
+                {
+                    BinaryFormatter bf = new BinaryFormatter();
+
+                    object obj = bf.Deserialize(fs);
+
+                    return obj;
+                }
+            }
+
+            return null;
+
         }
     }
 }

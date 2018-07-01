@@ -32,6 +32,7 @@
                 </DataGrid.Resources>
                 <DataGrid.RowStyle>
                     <Style TargetType="DataGridRow" >
+                        
                         <Setter Property="ContextMenu" Value="{StaticResource RowMenu}" />
                         <Style.Triggers>
                             <DataTrigger Binding="{Binding Path=Status}" Value="true">
@@ -40,6 +41,11 @@
                             <DataTrigger Binding="{Binding Path=Status}" Value="false">
                                 <Setter Property="Background" Value="LightPink"/>
                             </DataTrigger>
+
+                            <Trigger Property="IsSelected" Value="True">
+                                <Setter Property="Foreground" Value="Red"/>
+                                <Setter Property="Background" Value="Blue" />
+                            </Trigger>
                         </Style.Triggers>
                     </Style>
                 </DataGrid.RowStyle>

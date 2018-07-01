@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Configuration;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -119,9 +120,9 @@ namespace ZipPlanner.Models
                         }
                         else
                         {
-                            if (Group.Length < 3 || Group.Length > 9)
+                            if (Group.Length < 2 || Group.Length > 15)
                             {
-                                error = "Имя группы задания должно быть больше 3 и меньше 10";
+                                error = "Имя группы задания должно быть больше 2 и меньше 15";
                             }
                         }
                         break;
@@ -152,9 +153,27 @@ namespace ZipPlanner.Models
                         }
                         break;
                     case "Filter":
-                        if (Filter.Count == 0 || EndFileName == null)
+                        if (Filter.Count == 0 || Filter == null)
                         {
                             error = "Фильтр не должен быть пустым";
+                        }
+                        break;
+                    case "StartPath":
+                        if (!Directory.Exists(StartPath))
+                        {
+                            error = "Папка по текущему пути не найдена. Введите корректный путь";
+                        }
+                        break;
+                    case "EndPath":
+                        if (!Directory.Exists(EndPath))
+                        {
+                            error = "Папка по текущему пути не найдена. Введите корректный путь";
+                        }
+                        break;
+                    case "DateTimeFormat":
+                        if(DateTimeFormat == null || DateTimeFormat == "")
+                        {
+                            error = "Формат вывода даты не может быть пустым";
                         }
                         break;
                 }

@@ -53,35 +53,48 @@
                 </TextBox.Text>
             </TextBox>
             <TextBlock Text="Дирректория поиска"/>
-            <TextBox Text="{Binding StartPath}"/>
-            <TextBlock Text="Дирректория дя сохранения"/>
-            <TextBox Text="{Binding EndPath}"/>
+            <TextBox>
+                <TextBox.Text>
+                    <Binding Path="StartPath"  NotifyOnValidationError="True" UpdateSourceTrigger="PropertyChanged">
+                        <Binding.ValidationRules>
+                            <DataErrorValidationRule />
+                        </Binding.ValidationRules>
+                    </Binding>
+                </TextBox.Text>
+            </TextBox>
+            <TextBlock Text="Дирректория для сохранения"/>
+            <TextBox>
+                <TextBox.Text>
+                    <Binding Path="EndPath"  NotifyOnValidationError="True" UpdateSourceTrigger="PropertyChanged">
+                        <Binding.ValidationRules>
+                            <DataErrorValidationRule />
+                        </Binding.ValidationRules>
+                    </Binding>
+                </TextBox.Text>
+            </TextBox>
             <TextBlock Text="Имя файла архива"/>
-            <TextBox Text="{Binding EndFileName}"/>
+            <TextBox>
+                <TextBox.Text>
+                    <Binding Path="EndFileName"  NotifyOnValidationError="True" UpdateSourceTrigger="PropertyChanged">
+                        <Binding.ValidationRules>
+                            <DataErrorValidationRule />
+                        </Binding.ValidationRules>
+                    </Binding>
+                </TextBox.Text>
+            </TextBox>
             <TextBlock Text="Формат даты (используется в имени файла)"/>
-            <TextBox Text="{Binding DateTimeFormat}"/>
+            <TextBox>
+                <TextBox.Text>
+                    <Binding Path="DateTimeFormat"  NotifyOnValidationError="True" UpdateSourceTrigger="PropertyChanged">
+                    <Binding.ValidationRules>
+                        <DataErrorValidationRule />
+                    </Binding.ValidationRules>
+                </Binding>
+                </TextBox.Text>
+            </TextBox>
             <CheckBox Content="Добавить дату к имени файла?" IsChecked="{Binding UseDateTimeFormat}"/>
             <TextBlock Text="Фильтр"/>
-            <ListBox Name="filter_lb" ItemsSource="{Binding Path=Filter}" Height="50">
-                <ListBox.ItemTemplate>
-                    <DataTemplate>
-                        <TextBox Text="{Binding Name, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=True}"
-                     Validation.ValidationAdornerSite="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListBoxItem}}"/>
-                    </DataTemplate>
-                </ListBox.ItemTemplate>
-                <ListBox.ItemContainerStyle>
-                    <Style TargetType="ListBoxItem">
-                        <Setter Property="Validation.ErrorTemplate">
-                            <Setter.Value>
-                                <ControlTemplate>
-                                    <Border Background="Red" Opacity="0.2">
-                                        <Adorn edElementPlaceholder/>
-                                    </Border>
-                                </ControlTemplate>
-                            </Setter.Value>
-                        </Setter>
-                    </Style>
-                </ListBox.ItemContainerStyle>
+            <ListBox Name="filter_lb" ItemsSource="{Binding Path=Filter,ValidatesOnNotifyDataErrors=True}" Height="50">
                 <ListBox.ContextMenu>
                     <ContextMenu>
                         <MenuItem Name="addfilter_bt" Header="Добавить"  Click="Addfilter_bt_Click"/>
