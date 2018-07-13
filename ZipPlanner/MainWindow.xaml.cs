@@ -35,7 +35,7 @@ namespace ZipPlanner
 {
     public class CustomJob : IJob
     {
-        Task IJob.Execute(IJobExecutionContext context)
+        public void Execute(IJobExecutionContext context)
         {
 
             var logger = NLog.LogManager.GetCurrentClassLogger();
@@ -72,7 +72,7 @@ namespace ZipPlanner
 
             process.WaitForExit();
 
-            if(process.ExitCode == 0)
+            if (process.ExitCode == 0)
             {
                 logger.Info("Успешное завершение команды - " + command);
             }
@@ -83,18 +83,69 @@ namespace ZipPlanner
 
             process.Close();
 
-            logger.Info("Задание - " + context.Trigger.Key.Name + ": " + context.Trigger.Key.Group + " завершено!");
-
-            return Task.CompletedTask;
+            logger.Info("Задание - " + context.Trigger.Key.Name + ": " + context.Trigger.Key.Group + " завершено");
         }
+
+        //Task IJob.Execute(IJobExecutionContext context)
+        //{
+
+        //    var logger = NLog.LogManager.GetCurrentClassLogger();
+
+        //    logger.Info("Выполнение задания - " + context.Trigger.Key.Name + ": " + context.Trigger.Key.Group);
+
+        //    JobKey key = context.JobDetail.Key;
+
+        //    JobDataMap dataMap = context.MergedJobDataMap;  // Note the difference from the previous example
+        //    string command = dataMap.GetString("Command");
+
+
+        //    logger.Info("Запуск команды - " + command);
+
+        //    var processInfo = new ProcessStartInfo("cmd.exe", "/c " + command)
+        //    {
+        //        CreateNoWindow = true,
+        //        UseShellExecute = false,
+        //        RedirectStandardError = true,
+        //        RedirectStandardOutput = true,
+        //        StandardErrorEncoding = Encoding.GetEncoding(866),
+        //        StandardOutputEncoding = Encoding.GetEncoding(866),
+        //    };
+
+        //    var process = Process.Start(processInfo);
+
+        //    process.OutputDataReceived += (object sender, DataReceivedEventArgs e) =>
+        //        logger.Info("output>> " + e.Data);
+        //    process.BeginOutputReadLine();
+
+        //    process.ErrorDataReceived += (object sender, DataReceivedEventArgs e) =>
+        //        logger.Info("error>> " + e.Data);
+        //    process.BeginErrorReadLine();
+
+        //    process.WaitForExit();
+
+        //    if(process.ExitCode == 0)
+        //    {
+        //        logger.Info("Успешное завершение команды - " + command);
+        //    }
+        //    else
+        //    {
+        //        logger.Info("Ошибка выполнения команды - " + command);
+        //    }
+
+        //    process.Close();
+
+        //    logger.Info("Задание - " + context.Trigger.Key.Name + ": " + context.Trigger.Key.Group + " завершено!");
+
+        //    return Task.CompletedTask;
+        //}
     }
 
     public class CustomSheduler
     {
-        public static async void Start(string jobName, string groupName, string command, string cronExpression = "0 0/1 * * * ?")
+        public static void Start(string jobName, string groupName, string command, string cronExpression = "0 0/1 * * * ?")
         {
-            IScheduler scheduler = await StdSchedulerFactory.GetDefaultScheduler();
-            await scheduler.Start();
+            IScheduler scheduler = StdSchedulerFactory.GetDefaultScheduler();
+            scheduler.Start();
 
             IJobDetail job = JobBuilder.Create<CustomJob>().WithDescription("Пользовательская настройка").Build();
 
@@ -106,7 +157,7 @@ namespace ZipPlanner
                 .ForJob(job)
                 .Build();                               // создаем триггер
 
-            await scheduler.ScheduleJob(job, trigger);        // начинаем выполнение работы
+            scheduler.ScheduleJob(job, trigger);        // начинаем выполнение работы
 
             var logger = LogManager.GetCurrentClassLogger();
 
@@ -149,7 +200,7 @@ namespace ZipPlanner
                     {
                         for (int i = 0; i < archiveJobs.Count; i++)
                         {
-                            archiveJobs[i].Status = ArchiveScheduler.Start(archiveJobs[i]).Result;
+                            archiveJobs[i].Status = ArchiveScheduler.Start(archiveJobs[i]);
                         }
                     }
                 }
@@ -189,7 +240,7 @@ namespace ZipPlanner
                 archiveJobs.Add(archiveJob);
                 //archiveJobs.
                 MessageBox.Show("Успешно изменено");
-                archiveJob.Status = ArchiveScheduler.Start(archiveJob).Result;
+                archiveJob.Status = ArchiveScheduler.Start(archiveJob);
 
                 SaveData("archive-jobs.dat", archiveJobs);
             }
@@ -215,9 +266,9 @@ namespace ZipPlanner
 
             if (addSchelude_dlg.ShowDialog() == true)
             {
-                item.Status = !ArchiveScheduler.Stop(item).Result;
+                item.Status = !ArchiveScheduler.Stop(item);
                 //archiveJobs.
-                item.Status = ArchiveScheduler.Start(item).Result;
+                item.Status = ArchiveScheduler.Start(item);
             }
             else
             { 
@@ -236,7 +287,7 @@ namespace ZipPlanner
             {
                 if(item.Status == true)
                 {
-                    item.Status = !ArchiveScheduler.Stop(item).Result;
+                    item.Status = !ArchiveScheduler.Stop(item);
                     db_archivejobs.Items.Refresh();
                 }
             }
@@ -251,7 +302,7 @@ namespace ZipPlanner
             {
                 if (item.Status == false)
                 {
-                    item.Status = ArchiveScheduler.Start(item).Result;
+                    item.Status = ArchiveScheduler.Start(item);
                     db_archivejobs.Items.Refresh();
                 }
             }
@@ -264,7 +315,7 @@ namespace ZipPlanner
             {
                 for (int i = 0; i < archiveJobs.Count; i++)
                 {
-                    archiveJobs[i].Status = !ArchiveScheduler.Stop(archiveJobs[i]).Result;
+                    archiveJobs[i].Status = !ArchiveScheduler.Stop(archiveJobs[i]);
                     db_archivejobs.Items.Refresh();
                 }
             }
@@ -276,7 +327,7 @@ namespace ZipPlanner
             {
                 for (int i = 0; i < archiveJobs.Count; i++)
                 {
-                    archiveJobs[i].Status = ArchiveScheduler.Start(archiveJobs[i]).Result;
+                    archiveJobs[i].Status = ArchiveScheduler.Start(archiveJobs[i]);
                     db_archivejobs.Items.Refresh();
                 }
             }

@@ -11,15 +11,15 @@ namespace ZipPlanner.Models
 {
     public class ArchiveScheduler
     {
-        public static async Task<bool> Start(ArchiveSavedJob archiveJob)
+        public static bool Start(ArchiveSavedJob archiveJob)
         {
 
             var logger = LogManager.GetCurrentClassLogger();
 
             try
             {
-                IScheduler scheduler = await StdSchedulerFactory.GetDefaultScheduler();
-                await scheduler.Start();
+                IScheduler scheduler = StdSchedulerFactory.GetDefaultScheduler();
+                scheduler.Start();
 
                 IJobDetail job = JobBuilder.Create<ArchiveJob>().WithDescription("Архивация").Build();
 
@@ -48,7 +48,7 @@ namespace ZipPlanner.Models
 
                 if (job != null && trigger != null)
                 {
-                    await scheduler.ScheduleJob(job, trigger);        // начинаем выполнение работы
+                    scheduler.ScheduleJob(job, trigger);        // начинаем выполнение работы
 
                     logger.Info("Инициализация планировщика - " + archiveJob.Name + ": " + archiveJob.Group);
 
@@ -71,9 +71,9 @@ namespace ZipPlanner.Models
             return false;
         }
 
-        public static async Task<bool> GetStatusAsync(ArchiveSavedJob job)
+        public static bool GetStatusAsync(ArchiveSavedJob job)
         {
-            IScheduler scheduler = await StdSchedulerFactory.GetDefaultScheduler();
+            IScheduler scheduler = StdSchedulerFactory.GetDefaultScheduler();
             TriggerKey key = new TriggerKey(job.Name, job.Group);
 
             if (scheduler.IsStarted == true)
@@ -84,17 +84,17 @@ namespace ZipPlanner.Models
             return false;
         }
 
-        public static async Task<bool> Stop(ArchiveSavedJob job)
+        public static bool Stop(ArchiveSavedJob job)
         {
             var logger = LogManager.GetCurrentClassLogger();
 
             try
             {
-                IScheduler scheduler = await StdSchedulerFactory.GetDefaultScheduler();
+                IScheduler scheduler = StdSchedulerFactory.GetDefaultScheduler();
 
                 TriggerKey key = new TriggerKey(job.Name, job.Group);
 
-                await scheduler.UnscheduleJob(key);
+                scheduler.UnscheduleJob(key);
 
                 logger.Info("Задание - " + key.Name + ": " + key.Group + " остановлено !");
 
