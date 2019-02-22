@@ -192,18 +192,22 @@ namespace ZipPlanner
 
 
                 var objects = LoadData("archive-jobs.dat") as ObservableCollection<ArchiveSavedJob>;
-                archiveJobs = objects;
-
-                if (Settings.Default.bAutoStartScheduler)
+                if (objects != null)
                 {
-                    if (archiveJobs.Count > 0)
+                    archiveJobs = objects;
+
+                    if (Settings.Default.bAutoStartScheduler)
                     {
-                        for (int i = 0; i < archiveJobs.Count; i++)
+                        if (archiveJobs.Count > 0)
                         {
-                            archiveJobs[i].Status = ArchiveScheduler.Start(archiveJobs[i]);
+                            for (int i = 0; i < archiveJobs.Count; i++)
+                            {
+                                archiveJobs[i].Status = ArchiveScheduler.Start(archiveJobs[i]);
+                            }
                         }
                     }
                 }
+
                 db_archivejobs.DataContext = archiveJobs;
 
             }
@@ -336,12 +340,15 @@ namespace ZipPlanner
 
         private void SaveData(string filename,object jobs)
         {
-            // создаем объект BinaryFormatter
-            BinaryFormatter formatter = new BinaryFormatter();
-            // получаем поток, куда будем записывать сериализованный объект
-            using (FileStream fs = new FileStream(filename, FileMode.Create))
+            if (jobs != null)
             {
-                formatter.Serialize(fs, jobs);
+                // создаем объект BinaryFormatter
+                BinaryFormatter formatter = new BinaryFormatter();
+                // получаем поток, куда будем записывать сериализованный объект
+                using (FileStream fs = new FileStream(filename, FileMode.Create))
+                {
+                    formatter.Serialize(fs, jobs);
+                }
             }
         }
 
