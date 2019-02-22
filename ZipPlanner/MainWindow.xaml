@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:ZipPlanner"
         mc:Ignorable="d"
-        Title="Настройка планировщика" Height="450" Width="800" Closing="Scheluder_Closing">
+        Title="Настройка планировщика" Height="700" Width="800" Closing="Scheluder_Closing" Closed="Scheluder_Closed">
     <Window.Resources>
         <local:InverseBooleanConverter x:Key="InverseConverter"></local:InverseBooleanConverter>
     </Window.Resources>
@@ -17,6 +17,8 @@
         <Grid.RowDefinitions>
             <RowDefinition></RowDefinition>
             <RowDefinition></RowDefinition>
+            <RowDefinition></RowDefinition>
+            <RowDefinition Height="auto"></RowDefinition>
         </Grid.RowDefinitions>
         <StackPanel Margin="5" Grid.Row="0">
             <TextBlock Text="Архивирование"></TextBlock>
@@ -66,8 +68,57 @@
             </DataGrid>
         </StackPanel>
         <StackPanel Margin="5" Grid.Row="1">
+            <TextBlock Text="Копирование"></TextBlock>
+            <DataGrid Name="db_copyjobs" Height="194" VerticalAlignment="Top" ItemsSource="{Binding}">
+                <DataGrid.Resources>
+                    <ContextMenu x:Key="RowMenu" DataContext="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource Self}}">
+                        <MenuItem Name="statuscopy_run" Header="Запустить" Click="startcopy_bt_Click" IsEnabled="{Binding Path=Status, Converter={StaticResource InverseConverter}}"/>
+                        <MenuItem Header="Остановить" Name="statuscopy_stop" Click="stopcopy_bt_Click"  IsEnabled="{Binding Path=Status}"/>
+                        <Separator/>
+                        <MenuItem Header="Редактировать" Name="editcopy_bt" Click="editcopy_bt_Click"/>
+                        <MenuItem Header="Удалить" Name="removecopy_bt" Click="removecopy_bt_Click"/>
+                    </ContextMenu>
+                </DataGrid.Resources>
+                <DataGrid.RowStyle>
+                    <Style TargetType="DataGridRow" >
+
+                        <Setter Property="ContextMenu" Value="{StaticResource RowMenu}" />
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding Path=Status}" Value="true">
+                                <Setter Property="Background" Value="LightGreen"/>
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding Path=Status}" Value="false">
+                                <Setter Property="Background" Value="LightPink"/>
+                            </DataTrigger>
+
+                            <Trigger Property="IsSelected" Value="True">
+                                <Setter Property="Foreground" Value="Red"/>
+                                <Setter Property="Background" Value="Blue" />
+                            </Trigger>
+                        </Style.Triggers>
+                    </Style>
+                </DataGrid.RowStyle>
+                <DataGrid.ContextMenu>
+                    <ContextMenu>
+                        <MenuItem Name="addcopy_bt" Header="Добавить задание" Click="addcopy_bt_Click"/>
+                        <Separator/>
+                        <MenuItem Name="stopAllCopySchelude_bt" Header="Остановить все задания" Click="stopAllCopySchelude_bt_Click"/>
+                        <MenuItem Name="startAllCopySchelude_bt" Header="Запустить все задания" Click="startAllCopySchelude_bt_Click"/>
+                    </ContextMenu>
+                </DataGrid.ContextMenu>
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="Имя задания" Width="*" Binding="{Binding Path=Name}" IsReadOnly="True"></DataGridTextColumn>
+                    <DataGridTextColumn Header="Имя группы задания" Width="*" Binding="{Binding Path=Group}"  IsReadOnly="True"></DataGridTextColumn>
+                    <DataGridTextColumn Header="Период" Width="*" Binding="{Binding Path=CronExpression}"  IsReadOnly="True"></DataGridTextColumn>
+                    <DataGridTextColumn Header="Имя файла архива" Width="*" Binding="{Binding Path=StartPath}"  IsReadOnly="True"></DataGridTextColumn>
+                    <DataGridTextColumn Header="Имя файла архива" Width="*" Binding="{Binding Path=EndPath}"  IsReadOnly="True"></DataGridTextColumn>
+                </DataGrid.Columns>
+            </DataGrid>
+        </StackPanel>
+        <StackPanel Margin="5" Grid.Row="2">
             <TextBlock Text="Выполнение внешних приложений и команд"></TextBlock>
             <DataGrid Name="db_customjobs" Height="194" VerticalAlignment="Top" ItemsSource="{Binding}"/>
         </StackPanel>
+        <StatusBar Grid.Row="3" Height="25"></StatusBar>
     </Grid>
 </Window>

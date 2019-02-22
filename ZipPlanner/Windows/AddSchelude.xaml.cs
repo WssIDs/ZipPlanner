@@ -61,11 +61,7 @@ namespace ZipPlanner.Windows
             if(job != null)
             {
                 AddFilter addfilter_dlg = new AddFilter(job.Filter);
-
-                if (addfilter_dlg.ShowDialog() == true)
-                {
-                    
-                }
+                addfilter_dlg.ShowDialog();
             }
         }
 

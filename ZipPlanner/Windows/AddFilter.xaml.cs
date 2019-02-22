@@ -40,6 +40,7 @@ namespace ZipPlanner.Windows
             }
             else
             {
+                DialogResult = false;
                 MessageBox.Show("Невозможно добавить дважды одинаковый фильтр");
             }
         }

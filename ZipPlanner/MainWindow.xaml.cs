@@ -213,7 +213,7 @@ namespace ZipPlanner
             }
             else
             {
-                MessageBox.Show("Приложение уже запущено! Запуск более одной копии приложения невозможен","Ошибка");
+                MessageBox.Show("Приложение уже запущено! Запуск более одной копии приложения невозможен", "Ошибка");
                 logger.Error("Попытка запуска второй копии приложения");
                 Close();
             }
@@ -225,8 +225,9 @@ namespace ZipPlanner
 
             SaveData("archive-jobs.dat", archiveJobs);
 
-            foreach(var job in archiveJobs)
+            foreach (var job in archiveJobs)
             {
+                ArchiveScheduler.Stop(job);
                 logger.Warn("Завершение задания (Завершение работы приложения) - " + job.Name + ": " + job.Group);
             }
 
@@ -242,7 +243,6 @@ namespace ZipPlanner
             if (addSchelude_dlg.ShowDialog() == true)
             {
                 archiveJobs.Add(archiveJob);
-                //archiveJobs.
                 MessageBox.Show("Успешно изменено");
                 archiveJob.Status = ArchiveScheduler.Start(archiveJob);
 
@@ -337,6 +337,108 @@ namespace ZipPlanner
             }
         }
 
+        private void addcopy_bt_Click(object sender, RoutedEventArgs e)
+        {
+            //ArchiveSavedJob archiveJob = new ArchiveSavedJob();
+            //archiveJob.Id = Guid.NewGuid();
+            //var addSchelude_dlg = new AddSchedule(archiveJob);
+
+            //if (addSchelude_dlg.ShowDialog() == true)
+            //{
+            //    archiveJobs.Add(archiveJob);
+            //    MessageBox.Show("Успешно изменено");
+            //    archiveJob.Status = ArchiveScheduler.Start(archiveJob);
+
+            //    SaveData("archive-jobs.dat", archiveJobs);
+            //}
+
+            //db_archivejobs.Items.Refresh();
+        }
+
+        private void startcopy_bt_Click(object sender, RoutedEventArgs e)
+        {
+            //var item = db_archivejobs.SelectedItem as ArchiveSavedJob;
+
+            //if (item != null)
+            //{
+            //    if (item.Status == false)
+            //    {
+            //        item.Status = ArchiveScheduler.Start(item);
+            //        db_archivejobs.Items.Refresh();
+            //    }
+            //}
+
+        }
+
+        private void removecopy_bt_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        private void editcopy_bt_Click(object sender, RoutedEventArgs e)
+        {
+            //var item = db_archivejobs.SelectedItem as ArchiveSavedJob;
+
+            //Mapper.Reset();
+            //Mapper.Initialize(cfg => cfg.CreateMap<ArchiveSavedJob, ArchiveSavedJob>());
+            //ArchiveSavedJob temp = Mapper.Map<ArchiveSavedJob>(item);
+
+            //var addSchelude_dlg = new AddSchedule(item);
+            //addSchelude_dlg.Owner = this;
+
+            //if (addSchelude_dlg.ShowDialog() == true)
+            //{
+            //    item.Status = !ArchiveScheduler.Stop(item);
+            //    //archiveJobs.
+            //    item.Status = ArchiveScheduler.Start(item);
+            //}
+            //else
+            //{
+            //    archiveJobs[db_archivejobs.SelectedIndex] = temp;
+            //}
+
+            //db_archivejobs.Items.Refresh();
+
+        }
+
+        private void stopcopy_bt_Click(object sender, RoutedEventArgs e)
+        {
+            //var item = db_archivejobs.SelectedItem as ArchiveSavedJob;
+
+            //if (item != null)
+            //{
+            //    if (item.Status == true)
+            //    {
+            //        item.Status = !ArchiveScheduler.Stop(item);
+            //        db_archivejobs.Items.Refresh();
+            //    }
+            //}
+
+        }
+
+        private void stopAllCopySchelude_bt_Click(object sender, RoutedEventArgs e)
+        {
+            //if (archiveJobs.Count > 0)
+            //{
+            //    for (int i = 0; i < archiveJobs.Count; i++)
+            //    {
+            //        archiveJobs[i].Status = !ArchiveScheduler.Stop(archiveJobs[i]);
+            //        db_archivejobs.Items.Refresh();
+            //    }
+            //}
+        }
+
+        private void startAllCopySchelude_bt_Click(object sender, RoutedEventArgs e)
+        {
+            //if (archiveJobs.Count > 0)
+            //{
+            //    for (int i = 0; i < archiveJobs.Count; i++)
+            //    {
+            //        archiveJobs[i].Status = ArchiveScheduler.Start(archiveJobs[i]);
+            //        db_archivejobs.Items.Refresh();
+            //    }
+            //}
+        }
 
         private void SaveData(string filename,object jobs)
         {
@@ -370,6 +472,10 @@ namespace ZipPlanner
 
             return null;
 
+        }
+
+        private void Scheluder_Closed(object sender, EventArgs e)
+        {
         }
     }
 }

@@ -9,9 +9,9 @@ using System.Threading.Tasks;
 
 namespace ZipPlanner.Models
 {
-    public class ArchiveScheduler
+    public class CopyScheduler
     {
-        public static bool Start(ArchiveSavedJob archiveJob)
+        public static bool Start(CopySavedJob copyJob)
         {
 
             var logger = LogManager.GetCurrentClassLogger();
@@ -21,27 +21,21 @@ namespace ZipPlanner.Models
                 IScheduler scheduler = StdSchedulerFactory.GetDefaultScheduler();
                 scheduler.Start();
 
-                IJobDetail job = JobBuilder.Create<ArchiveJob>().WithDescription("Архивация").Build();
+                IJobDetail job = JobBuilder.Create<ArchiveJob>().WithDescription("Копирование").Build();
 
-                CronExpression.ValidateExpression(archiveJob.CronExpression);
+                CronExpression.ValidateExpression(copyJob.CronExpression);
 
                 JobDataMap jobMap = new JobDataMap();
-                jobMap.Put("Filter", archiveJob.Filter);
+                jobMap.Put("Filter", copyJob.Filter);
 
                 ITrigger trigger = TriggerBuilder.Create()  // создаем триггер
-                    .WithIdentity(archiveJob.Name, archiveJob.Group)     // идентифицируем триггер с именем и группой
+                    .WithIdentity(copyJob.Name, copyJob.Group)     // идентифицируем триггер с именем и группой
                     .StartNow()
-                    .WithCronSchedule(archiveJob.CronExpression)      // каждую минуту 
-                    .UsingJobData("StartPath", archiveJob.StartPath)
-                    .UsingJobData("EndPath", archiveJob.EndPath)
-                    .UsingJobData("EndFileName",archiveJob.EndFileName)
+                    .WithCronSchedule(copyJob.CronExpression)      // каждую минуту 
+                    .UsingJobData("StartPath", copyJob.StartPath)
+                    .UsingJobData("EndPath", copyJob.EndPath)
                     .UsingJobData(jobMap)
-                    .UsingJobData("DateTimeFormat", archiveJob.DateTimeFormat)
-                    .UsingJobData("DeleteFiles", archiveJob.DeleteFiles)
-                    .UsingJobData("UseName", archiveJob.UseName)
-                    .UsingJobData("UseGroup", archiveJob.UseGroup)
-                    .UsingJobData("UseDateTimeFormat", archiveJob.UseDateTimeFormat)
-                    .UsingJobData("UseGuid", archiveJob.UseGuid)
+                    .UsingJobData("DeleteFiles", copyJob.DeleteFiles)
                     .ForJob(job)
                     .Build();                               // создаем триггер
 
@@ -49,16 +43,12 @@ namespace ZipPlanner.Models
                 if (job != null && trigger != null)
                 {
                     scheduler.ScheduleJob(job, trigger);        // начинаем выполнение работы
-
-                    logger.Info("Инициализация планировщика - " + archiveJob.Name + ": " + archiveJob.Group);
-
+                    logger.Info("Инициализация планировщика - " + copyJob.Name + ": " + copyJob.Group);
                     return true;
-
-                    //
                 }
                 else
                 {
-                    logger.Error("Ошибка инициализации планировщика - " + archiveJob.Name + ": " + archiveJob.Group);
+                    logger.Error("Ошибка инициализации планировщика - " + copyJob.Name + ": " + copyJob.Group);
                 }
             }
             catch (Exception e)
@@ -71,7 +61,7 @@ namespace ZipPlanner.Models
             return false;
         }
 
-        public static bool GetStatusAsync(ArchiveSavedJob job)
+        public static bool GetStatusAsync(CopySavedJob job)
         {
             IScheduler scheduler = StdSchedulerFactory.GetDefaultScheduler();
             TriggerKey key = new TriggerKey(job.Name, job.Group);
@@ -84,7 +74,7 @@ namespace ZipPlanner.Models
             return false;
         }
 
-        public static bool Stop(ArchiveSavedJob job)
+        public static bool Stop(CopySavedJob job)
         {
             var logger = LogManager.GetCurrentClassLogger();
 

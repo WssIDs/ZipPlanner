@@ -88,6 +88,8 @@
     <Compile Include="Converters\InverseBooleanConverter.cs" />
     <Compile Include="Models\ArchiveJob.cs" />
     <Compile Include="Models\ArchiveScheduler.cs" />
+    <Compile Include="Models\CopyJob.cs" />
+    <Compile Include="Models\CopyScheduler.cs" />
     <Compile Include="Settings.cs" />
     <Compile Include="Windows\AddFilter.xaml.cs">
       <DependentUpon>AddFilter.xaml</DependentUpon>
